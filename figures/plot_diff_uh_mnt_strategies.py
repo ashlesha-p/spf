@@ -70,8 +70,8 @@ if __name__ == '__main__':
     if not os.path.exists('pngs'):
         os.makedirs('pngs')
     in_files = \
-        ['data/W4xL4_TriangularLatticeChannel_MW5_100MC_SPF_UH_MT_TEL_RATE.csv',
-         'data/W4xL4_TriangularLatticeChannel_MW5_100MC_SPF_UH_MC_TEL_RATE.csv']
+        ['data/W4xL4_CrazyGraphChannel_MW5_100MC_SPF_UH_MT_TEL_RATE.csv',
+         'data/W4xL4_CrazyGraphChannel_MW5_100MC_SPF_UH_MC_TEL_RATE.csv']
     out_file = 'pngs/tri_mnt_strategy_comparison.png'
     styles = [{'color': 'b', 'line': '-', 'label': 'Max-tolerance'},
               {'color': 'r', 'line': '-', 'label': 'Most common'}]

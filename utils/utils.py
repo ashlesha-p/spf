@@ -2,7 +2,7 @@
 import os
 import sys
 import signal
-from itertools import chain, combinations, izip
+from itertools import chain, combinations
 
 
 def enablePrint():
@@ -27,17 +27,17 @@ def flatten(array, level=1):
 
 def bitwise_or(a, b):
     """ Outputs the bitsting produced by a bitwise or of a and b """
-    return (i | j for i, j in izip(a, b))
+    return (i | j for i, j in zip(a, b))
 
 
 def bitwise_xor(a, b):
     """ Outputs the bitsting produced by a bitwise or of a and b """
-    return (i ^ j for i, j in izip(a, b))
+    return (i ^ j for i, j in zip(a, b))
 
 
 def bitwise_and(a, b):
     """ Outputs the bitsting produced by a bitwise or of a and b """
-    return (i & j for i, j in izip(a, b))
+    return (i & j for i, j in zip(a, b))
 
 
 def select(l, indices):

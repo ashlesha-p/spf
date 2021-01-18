@@ -1,7 +1,7 @@
 # Import Python packages
 import itertools as it
 # Import local modules
-from channel import Channel
+from channels.channel import Channel
 
 
 class CrazyGraphChannel(Channel):

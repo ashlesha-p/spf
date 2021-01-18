@@ -58,8 +58,8 @@ def channel_build_time_trial_scan(channel, variables, consts, mc_reps,
                                   filename=None, workers=1):
     """ Gets the average build time for channel over vars mesh. """
     data = []
-    print consts
-    print variables
+    print(consts)
+    print(variables)
     var_names = variables.keys()
     var_mesh = list(it.product(*variables.values()))
     for var_set in tqdm(var_mesh):
@@ -98,7 +98,7 @@ def random_gnm_build_time_trials(nodes, edge_divs, mc_reps, max_weight=0,
         for n in nodes:
             edges = np.linspace(n - 1, n * (n - 1) / 2, edge_divs, dtype=int) \
                 if n * (n - 1) / 2 - n + 1 > edge_divs \
-                else range(n-1, n * (n - 1) / 2 + 1)
+                else range(n-1, int(n * (n - 1) / 2 + 1))
             m_pbar = tqdm(total=len(edges), desc='Edges')
             for m in edges:
                 if (n, m) not in simmed:

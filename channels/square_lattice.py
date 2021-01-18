@@ -70,4 +70,4 @@ if __name__ == '__main__':
     psi._test_all_non_trivial_combos_found(print_stabs=True)
     psi._test_combo_stabs_correct()
     mnt_pats, qubit_index = psi.get_mnt_patterns()
-    print sum([len(pats) for pats in mnt_pats.values()])
+    print(sum([len(pats) for pats in mnt_pats.values()]))

@@ -9,6 +9,7 @@ from pprint import pprint
 from copy import deepcopy
 from tqdm import tqdm
 from collections import defaultdict
+from functools import reduce
 # Import local modules
 sys.path.append('..')
 from utils.stab_utils import *
@@ -60,7 +61,7 @@ class Channel:
     def _import_channel_from_file(self, filename):
         """ Imports the channel's state from a previously generated JSON """
         data = json.load(open(filename, 'r'))
-        for key, value in data.iteritems():
+        for key, value in data.items():
             setattr(self, key, value)
 
     def export_channel_to_file(self, filename):
@@ -84,21 +85,22 @@ class Channel:
     @decorator.decorator
     def _verbose(func, *args, **kwargs):
         """ Prints the state of object before and after method's action """
-        fname = func.func_name
-        argnames = func.func_code.co_varnames[:func.func_code.co_argcount]
+        fname = func.__name__
+        argnames = func.__code__.co_varnames[:func.__code__.co_argcount]
         # Prints state of object before function
-        print "Before %s(%s):" % (fname, ', '.join(
-            '%s=%r' % entry
-            for entry in zip(argnames, args)[1:] + kwargs.items()))
-        print args[0], '\n'
+        zipped_list = list(zip(argnames, args))#!
+        #print("Before %s(%s):" % (fname, ', '.join(
+         #   '%s=%r' % entry
+          #  for entry in zipped_list[1:] + kwargs.items())))
+        print(args[0], '\n')
         # Applies function and stores any output
         result = func(*args, **kwargs)
         # Prints state of object after function
-        print "\nAfter %s(%s):" % (fname, ', '.join(
-            '%s=%r' % entry
-            for entry in zip(argnames, args)[1:] + kwargs.items()))
-        print args[0], '\n'
-        print "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
+        #print("\nAfter %s(%s):" % (fname, ', '.join(
+         #   '%s=%r' % entry
+          #  for entry in zip(argnames, args)[1:] + kwargs.items())))
+        print(args[0], '\n')
+        print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n")
         # Returns function's output
         return result
 
@@ -109,11 +111,11 @@ class Channel:
             self = args[0]
             output = func(*args, **kwargs)
             print
-            print "Testing all combo stabs correct..."
+            print("Testing all combo stabs correct...")
             self._test_combo_stabs_correct(exit)
-            print "Testing all non-trivial combos found..."
+            print("Testing all non-trivial combos found...")
             self._test_all_non_trivial_combos_found(print_stabs, join, exit)
-            print "Tests complete"
+            print("Tests complete")
             return output
         return wrapper
 
@@ -123,10 +125,10 @@ class Channel:
         stabs = stabs if stabs else self.combo_stabs
         vert_labels = self._build_vert_labels()
         # Outputs logical X and Z operators and stab gens S with qubit key Q
-        print "S: {}\n" \
+        print("S: {}\n" \
               "Q: ph {}"\
             .format(',\n   '.join(to_pauli(stab) for stab in stabs),
-                    '\n      '.join(' '.join(row) for row in vert_labels))
+                    '\n      '.join(' '.join(row) for row in vert_labels)))
 
     def _get_indices(self, qubits):
         """ Returns a list of indices for a provided qubit list """
@@ -158,9 +160,9 @@ class Channel:
         for combo, stab in tqdm(combo_stabs):
             # Checks stab combo supp overlap with inputs and outputs. If no
             # ouputs or inputs defined, ignores (i.e. sets overlap as True)
-            i_supp = any(op for qubit, op in it.izip(self.qubits, stab[1])
+            i_supp = any(op for qubit, op in list(zip(self.qubits, stab[1]))
                          if qubit in self.inputs) if self.inputs else True
-            o_supp = any(op for qubit, op in it.izip(self.qubits, stab[1])
+            o_supp = any(op for qubit, op in list(zip(self.qubits, stab[1]))
                          if qubit in self.outputs) if self.outputs else True
             # Defines usefullness condition for joined and unjoined combos
             useless = not i_supp or not o_supp if join else False
@@ -325,9 +327,9 @@ class Channel:
                 self._is_non_trivial_combo_internal(combo,
                                                     test_combos=test_combos)
             if stab != s:
-                print "Incorrect stab found:"
-                print self
-                print combo
+                print("Incorrect stab found:")
+                print(self)
+                print(combo)
                 self._print_stabs([stab, s])
                 raise Exception("Incorrect stabilizer tracked")
             if not non_trivial:
@@ -337,9 +339,9 @@ class Channel:
             fin_len = len(self.gen_combos)
             len_diff = init_len - fin_len
             # print
-            print "Initially %d stabilizer combos, now %d "\
+            print("Initially %d stabilizer combos, now %d "\
                 "(%d removed, %d tested)." % \
-                (init_len, fin_len, len_diff, len(combo_stabs))
+                (init_len, fin_len, len_diff, len(combo_stabs)))
 
     def _support_to_combo_int(self, qubits):
         """ Converts a list of qubits to the combo integer it represents """
@@ -464,7 +466,7 @@ class Channel:
         gens = ((g, gen) for g, gen in enumerate(self.stab_gens))
         for (combo, stab), (g, gen) in it.product(combo_stabs, gens):
             trivial = all(gen_op == stab_op for gen_op, stab_op
-                          in it.izip(gen[1], stab[1]) if stab_op)
+                          in it.zip(gen[1], stab[1]) if stab_op)
             # If non-gen stab S_c provides half of triv bipartition and
             # contains a then replace K_a with S_c and updates other stabs
             if not trivial or not combo[g]:
@@ -533,9 +535,9 @@ class Channel:
         form if they are.
         """
         for gen in self.combo_stabs + self.stab_gens:
-            if all(i == j for i, j in it.izip(gen[1], self.X_op[1]) if i != 0):
+            if all(i == j for i, j in it.zip(gen[1], self.X_op[1]) if i != 0):
                 self.X_op = stab_multiply(gen, self.X_op)
-            if all(i == j for i, j in it.izip(gen[1], self.Z_op[1]) if i != 0):
+            if all(i == j for i, j in it.zip(gen[1], self.Z_op[1]) if i != 0):
                 self.Z_op = stab_multiply(gen, self.Z_op)
 
     @_verbose
@@ -663,7 +665,8 @@ class Channel:
         if sum(combo) == 1:
             return True, combo_stab
         # Gets max c for (len(qubits) choose c)-fold combinations to test
-        c = sum(combo) / 2
+        c = int(sum(combo) / 2)
+        
         # Tries iteratively larger i-fold combinations of gens
         for i in range(1, c + 1):
             # Tests each of the i-fold combinations for triviality
@@ -695,7 +698,7 @@ class Channel:
                 test_stab = self.combo_stabs[self.gen_combos.index(test_combo)]
                 if any(test_stab[1]) and \
                     not any(pauli_a != pauli_b for pauli_a, pauli_b
-                            in it.izip(combo_stab[1], test_stab[1])
+                            in it.zip(combo_stab[1], test_stab[1])
                             if pauli_b):
                     if return_test_stab:
                         return False, test_stab
@@ -758,7 +761,7 @@ class Channel:
                         mnt_pat = drop([max([i, j]) for i, j
                                         in zip(x_op[1], z_op[1])],
                                        output_indices + loss_indices)
-                        mnt_weight = len(filter(None, mnt_pat))
+                        mnt_weight = len(list(filter(None, mnt_pat)))
                         mnt_patterns[mnt_weight].append(mnt_pat)
         # Gets measurement patterns' qubit key
         ignore_qubits = self.outputs + self.heralded_loss
@@ -787,10 +790,10 @@ class Channel:
 
     def _no_duplicated_combos(self, exit=True):
         """ Ensures there are no duplicated combos """
-        combos = map(tuple, self.gen_combos)
+        combos = list(map(tuple, self.gen_combos))
         if len(set(combos)) != len(combos):
             duplicates = [combo for combo in combos if combos.count(combo) > 1]
-            print "Duplicated combinations"
+            print("Duplicated combinations")
             pprint(set(duplicates))
             if exit:
                 raise Exception('Duplicate stabilizer combinations found.')
@@ -804,20 +807,20 @@ class Channel:
             non_trivial, target = self._is_non_trivial_combo_exhuastive(combo)
             # Checks whether combo trivial
             if not non_trivial:
-                print "Trivial combo"
-                print combo
+                print("Trivial combo")
+                print(combo)
                 self._print_stabs([stab, self._stab_from_combo(combo)])
                 non_trivial, stab = self._is_non_trivial_combo_exhuastive(
                     combo, True)
                 self._print_stabs([stab])
-                print self
+                print(self)
                 passed = False
             # Checks whether stab combo matches that tracked in channel
             if stab != target:
-                print "Incorrect stabilizer (correct stab on bottom)"
-                print combo
+                print("Incorrect stabilizer (correct stab on bottom)")
+                print(combo)
                 self._print_stabs([stab, target])
-                print
+                print(self)
                 passed = False
             if not non_trivial and exit:
                 raise Exception('Trivial stabilizer found.')
@@ -853,8 +856,8 @@ class Channel:
         nt_combos += [[int(i == j) for i in range(len(self.stab_gens))]
                       for j in null_gen_indices]
         if verbose:
-            print "%d non-trivial combos possible" % (len(nt_combos))
-            print "%d non-trivial combos tracked" % (len(self.gen_combos))
+            print("%d non-trivial combos possible" % (len(nt_combos)))
+            print("%d non-trivial combos tracked" % (len(self.gen_combos)))
         # Displays any tracked or untracked combos found
         if len(nt_combos) != len(self.gen_combos):
             untracked_combos = \
@@ -862,18 +865,18 @@ class Channel:
             overtracked_combos = \
                 set(map(tuple, self.gen_combos)) - set(map(tuple, nt_combos))
             if untracked_combos and print_stabs:
-                print "UNTRACKED COMBOS (%d):" % (len(untracked_combos))
+                print("UNTRACKED COMBOS (%d):" % (len(untracked_combos)))
                 for combo in untracked_combos:
                     combo = tuple(combo)
-                    print combo, [e for e, i in enumerate(combo) if i]
+                    print(combo, [e for e, i in enumerate(combo) if i])
                     untracked_gens = self._get_combo_gens(combo)
                     untracked_stab = reduce(stab_multiply, untracked_gens)
                     self._print_stabs([untracked_stab] + untracked_gens)
             if overtracked_combos and print_stabs:
-                print "OVERTRACKED COMBOS (%d):" % (len(overtracked_combos))
+                print("OVERTRACKED COMBOS (%d):" % (len(overtracked_combos)))
                 for combo in overtracked_combos:
                     combo = tuple(combo)
-                    print combo, [e for e, i in enumerate(combo) if i]
+                    print(combo, [e for e, i in enumerate(combo) if i])
                     overtracked_gens = self._get_combo_gens(combo)
                     overtracked_stab = reduce(stab_multiply, overtracked_gens)
                     self._print_stabs([overtracked_stab] + overtracked_gens)
@@ -900,4 +903,4 @@ if __name__ == '__main__':
                                   outputs=[10], join=True)
 
     mnt_pats, qubit_index = psi.get_mnt_patterns()
-    print sum([len(pats) for pats in mnt_pats.values()])
+    print(sum([len(pats) for pats in mnt_pats.values()]))

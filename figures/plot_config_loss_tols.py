@@ -78,17 +78,17 @@ if __name__ == '__main__':
         os.makedirs('pngs')
     styles = [{'color': 'deepskyblue', 'label': 'SPF'},
               {'color': 'salmon', 'label': 'GPF'}]
-    channels = ['W4xL4_SquareLatticeChannel',
-                'W4xL4_HexagonalLatticeChannel',
-                'W4xL4_TriangularLatticeChannel',
-                'B2xD3_TreeToTreeChannel']
-    for prefix in channels:
-        in_files = ['data/' + prefix + '_MW5_SPF_CONFIG_TOL.csv',
-                    'data/' + prefix + '_GPF_CONFIG_TOL.csv']
-        out_file = 'pngs/' + prefix + '_MW5_CONFIG_TOL_RATE.png'
-        plot_n_config_loss_tol(in_files, styles, out_file, norm=True)
-        out_file = 'pngs/' + prefix + '_MW5_CONFIG_TOL_ABS.png'
-        plot_n_config_loss_tol(in_files, styles, out_file, norm=False)
+    # channels = ['W4xL4_SquareLatticeChannel',
+    #             'W4xL4_HexagonalLatticeChannel',
+    #             'W4xL4_TriangularLatticeChannel',
+    #             'B2xD3_TreeToTreeChannel']
+    # for prefix in channels:
+    #     in_files = ['data/' + prefix + '_MW5_SPF_CONFIG_TOL.csv',
+    #                 'data/' + prefix + '_GPF_CONFIG_TOL.csv']
+    #     out_file = 'pngs/' + prefix + '_MW5_CONFIG_TOL_RATE.png'
+    #     plot_n_config_loss_tol(in_files, styles, out_file, norm=True)
+    #     out_file = 'pngs/' + prefix + '_MW5_CONFIG_TOL_ABS.png'
+    #     plot_n_config_loss_tol(in_files, styles, out_file, norm=False)
 
     # Plots just SPF for crazy graph
     prefix = 'W4xL4_CrazyGraphChannel'

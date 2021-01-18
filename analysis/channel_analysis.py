@@ -5,10 +5,10 @@ from time import time
 # Import local modules
 sys.path.append('..')
 from channels.channel import Channel
-from channels.square_lattice import SquareLatticeChannel
-from channels.hex_lattice import HexagonalLatticeChannel
-from channels.tri_lattice import TriangularLatticeChannel
-from channels.tree_to_tree import TreeToTreeChannel
+#from channels.square_lattice import SquareLatticeChannel
+#from channels.hex_lattice import HexagonalLatticeChannel
+#from channels.tri_lattice import TriangularLatticeChannel
+#from channels.tree_to_tree import TreeToTreeChannel
 from channels.crazy_graph import CrazyGraphChannel
 from loss_analysis import *
 
@@ -16,6 +16,8 @@ from loss_analysis import *
 def build_channel(channel, channel_kwargs, output, prefix,
                   test=False):
     """ Builds the channel and outputs data """
+    
+    print('\n           build_channel         \n')
     # Creates data directory if it doesn't exist
     if not os.path.exists('data'):
         os.makedirs('data')
@@ -23,12 +25,12 @@ def build_channel(channel, channel_kwargs, output, prefix,
     # ================== CREATES CHANNEL AND EXPORTS TO FILE ==================
     out_file = 'data/' + prefix + '_data_ALL.json'
     if not os.path.isfile(out_file):
-        print "Creating channel..."
+        print("Creating channel...")
         start = time()
         psi = channel(**channel_kwargs)
         end = time() - start
-        print "Runtime = %dm %ds\n" % (end / 60, end % 60)
-        print "Exporting channel to file..."
+        print("Runtime = %dm %ds\n" % (end / 60, end % 60))
+        print("Exporting channel to file...")
         psi.export_channel_to_file(out_file)
 
     # ======================== TESTS ALL STABS CORRECT ========================
@@ -39,8 +41,8 @@ def build_channel(channel, channel_kwargs, output, prefix,
     # ======= REMOVES STABS WITHOUT SUPPORT ON INPUT AND OUTPUT QUBITS ========
     out_file = 'data/' + prefix + '_data_JOINED.json'
     if not os.path.isfile(out_file):
-        print "Removing stabilizers without support on I or O..."
-        in_file = 'data/' + prefix + '_data_ALL.json'
+        print("Removing stabilizers without support on I or O...")
+        in_file = 'data/' + prefix + '_data_ALL.json'          
         psi = Channel(filename=in_file)
         inputs = list(set(psi._support(psi.X_op)) |
                       set(psi._support(psi.Z_op)))
@@ -52,10 +54,10 @@ def build_channel(channel, channel_kwargs, output, prefix,
 def analyse_channel(prefix, i, o, max_weight, rel_weights,
                     verbose=False, workers=1, mc_reps=1000):
     """ Performs a full analysis on the specified channel """
-
+    print('\n           analyse_channel         \n')
     # ======================= GETS MEASUREMENT PATTERNS =======================
     # (higher weight => deeper search for measurement patterns)
-    print "Finding measurement patterns..."
+    print("Finding measurement patterns...")
     in_file = 'data/' + prefix + '_data_JOINED.json'
     out_file = 'data/' + prefix + '_MW%d_MNT_PATS.json' % (max_weight)
     if not os.path.isfile(out_file):
@@ -69,7 +71,7 @@ def analyse_channel(prefix, i, o, max_weight, rel_weights,
         mnt_pats = json.load(open(out_file, 'r'))
         mnt_pats, qubit_key = mnt_pats['mnt_pats'], mnt_pats['qubit_key']
         # Turns JSON strings back to ints
-        mnt_pats = {int(key): value for key, value in mnt_pats.iteritems()}
+        mnt_pats = {int(key): value for key, value in mnt_pats.items()}
     out_file = 'data/' + prefix + '_MW%d_LOSS_TOL_RAW.json' % (max_weight)
     if not os.path.isfile(out_file):
         loss_tol = get_loss_tolerance(mnt_pats, qubit_key)
@@ -77,14 +79,14 @@ def analyse_channel(prefix, i, o, max_weight, rel_weights,
             json.dump(loss_tol, fp)
 
     # ================ IMPORTS RAW DATA AND FINDS ALL LOSS TOLS ===============
-    print "Finding all loss tolerances..."
+    print("Finding all loss tolerances...")
     in_file = 'data/' + prefix + '_MW%d_LOSS_TOL_RAW.json' % (max_weight)
     out_file = 'data/' + prefix + '_MW%d_SPF_LOSS_TOL_ALL.json' % (max_weight)
     if not os.path.isfile(out_file):
         loss_tols = import_loss_tols(in_file, filename=out_file)
 
     # ================ FINDS GRAPH PATHFINDING LOSS TOLERANCES ================
-    print "Finding graph pathfinding loss tolerances..."
+    print("Finding graph pathfinding loss tolerances...")
     in_file = 'data/' + prefix + '_data_ALL.json'
     out_file = 'data/' + prefix + '_GPF_LOSS_TOL_ALL.json'
     if not os.path.isfile(out_file):
@@ -94,7 +96,7 @@ def analyse_channel(prefix, i, o, max_weight, rel_weights,
         graph_loss_tols(graph, i, o, filename=out_file)
 
     # =============== GETS PER NODE LOSS TOLERANCE FOR HEATMAPS ===============
-    print "Calculating per-node loss tolerances..."
+    print("Calculating per-node loss tolerances...")
     in_file = 'data/' + prefix + '_MW%d_SPF_LOSS_TOL_ALL.json' % (max_weight)
     out_file = 'data/' + prefix + '_MW%d_SPF_PER_NODE_TOL.csv' % (max_weight)
     if not os.path.isfile(out_file):
@@ -102,7 +104,7 @@ def analyse_channel(prefix, i, o, max_weight, rel_weights,
         per_node_tols = get_per_node_loss_tol(all_tols, filename=out_file)
 
     # ============== SIMULATES SPF LOSS TOLERANCE VIA MONTE CARLO =============
-    print "Simulating SPF loss tolerance..."
+    print("Simulating SPF loss tolerance...")
     in_file = 'data/' + prefix + \
         '_MW%d_SPF_LOSS_TOL_ALL.json' % (max_weight)
     out_file = 'data/' + prefix + \
@@ -115,7 +117,7 @@ def analyse_channel(prefix, i, o, max_weight, rel_weights,
                                         verbose=verbose)
 
     # ============== SIMULATES GPF LOSS TOLERANCE VIA MONTE CARLO =============
-    print "Simulating GPF loss tolerance..."
+    print("Simulating GPF loss tolerance...")
     in_file = 'data/' + prefix + '_GPF_LOSS_TOL_ALL.json'
     out_file = 'data/' + prefix + '_%dMC_GPF_TEL_RATE.csv' % (mc_reps)
     if not os.path.isfile(out_file):
@@ -126,7 +128,7 @@ def analyse_channel(prefix, i, o, max_weight, rel_weights,
                                         verbose=verbose)
 
     # ===== CALCULATES PROPORTION OF LOSS CONFIGURATIONS SPF TOLERANT TO ======
-    print "Finding SPF configuration loss tolerance..."
+    print("Finding SPF configuration loss tolerance...")
     in_file = 'data/' + prefix + '_MW%d_SPF_LOSS_TOL_ALL.json' % (max_weight)
     out_file = 'data/' + prefix + '_MW%d_SPF_CONFIG_TOL.csv' % (max_weight)
     if not os.path.isfile(out_file):
@@ -135,7 +137,7 @@ def analyse_channel(prefix, i, o, max_weight, rel_weights,
                                                 filename=out_file)
 
     # ===== CALCULATES PROPORTION OF LOSS CONFIGURATIONS GPF TOLERANT TO ======
-    print "Finding GPF configuration loss tolerance..."
+    print("Finding GPF configuration loss tolerance...")
     in_file = 'data/' + prefix + '_GPF_LOSS_TOL_ALL.json'
     out_file = 'data/' + prefix + '_GPF_CONFIG_TOL.csv'
     if not os.path.isfile(out_file):
@@ -144,7 +146,7 @@ def analyse_channel(prefix, i, o, max_weight, rel_weights,
                                                 filename=out_file)
 
     # ===================== GET UNHERALDED LOSS TOLERANCE =====================
-    print "Finding unheralded loss tolerances..."
+    print("Finding unheralded loss tolerances...")
     out_file = 'data/' + prefix + \
         '_MW%d_%dMC_SPF_UH_MT_TEL_RATE.csv' % (max_weight, mc_reps)
     if not os.path.isfile(out_file):
@@ -152,7 +154,7 @@ def analyse_channel(prefix, i, o, max_weight, rel_weights,
         in_file = 'data/' + prefix + '_MW%d_MNT_PATS.json' % (max_weight)
         mnt_pats = json.load(open(in_file, 'r'))
         mnt_pats, qubit_key = mnt_pats['mnt_pats'], mnt_pats['qubit_key']
-        mnt_pats = {int(key): value for key, value in mnt_pats.iteritems()}
+        mnt_pats = {int(key): value for key, value in mnt_pats.items()}
         # Loads in loss tolerances
         in_file = 'data/' + prefix + \
             '_MW%d_SPF_LOSS_TOL_ALL.json' % (max_weight)
@@ -170,7 +172,7 @@ if __name__ == '__main__':
     mc_reps, workers = 1000, 1
 
     # =================== INPUT FOR SquareLatticeChannel ====================
-    print "Initialising input variables..."
+    print("Initialising input variables...")
     channel = SquareLatticeChannel
     width, length = 3, 3
     channel_kwargs = {'width': width, 'length': length, 'use_gpu': use_gpu}

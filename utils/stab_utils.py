@@ -1,5 +1,5 @@
 # Import Python packages
-from itertools import izip
+#from itertools import izip
 
 # Define mapping from binary to Pauli operators and vice versa
 binary_to_pauli = {0b00: '_', 0b01: 'X', 0b10: 'Y', 0b11: 'Z'}
@@ -56,9 +56,9 @@ def to_pauli(stab, string=True):
 
 def multiply_all_stabs(stabs):
     """ Multiplies a list of stabilizers together (can parallelize) """
-    phases, ops = zip(*stabs)
+    phases, ops = list(zip(*stabs))
     phase = sum(phases) % 4
-    ops = zip(*ops)
+    ops = list(zip(*ops))
     new_op = []
     for qubit_ops in ops:
         op = 0
@@ -73,7 +73,7 @@ def stab_multiply(stab_a, stab_b):
     """ Multiply two stabilizers together """
     stab_a, stab_b = stab_a[:], stab_b[:]
     phases = [stab_a[0], stab_b[0]]
-    paulis = zip(stab_a[1], stab_b[1])
+    paulis = list(zip(stab_a[1], stab_b[1]))
     phase = sum(phases)
     new_stab = []
     for pauli_a, pauli_b in paulis:
@@ -87,26 +87,26 @@ def stab_multiply(stab_a, stab_b):
 def is_trivial_partition(stab_a, stab_b):
     """ Returns True if stab_b is a trivial partition of stab_a """
     return all(pauli_a == pauli_b for pauli_a, pauli_b
-               in izip(stab_a[1], stab_b[1]) if pauli_b) and stab_a != stab_b
+               in list(zip(stab_a[1], stab_b[1])) if pauli_b) and stab_a != stab_b
 
 
 def is_non_trivial_stab_pair(stab1, stab2):
     """ Checks whether there is overlap between two stabilizer combos """
-    return any(a * b for a, b in izip(stab1[1], stab2[1]))
+    return any(a * b for a, b in list(zip(stab1[1], stab2[1])))
 
 
 def commute(a, b):
     """ Returns True if operators commute """
     ab, ba = stab_multiply(a, b), stab_multiply(b, a)
     ab_s, ba_s = (-1) ** int(ab[0] > 2), (-1) ** int(ba[0] > 2)
-    return not any(ab_s * i - ba_s * j for i, j in izip(ab[1], ba[1]))
+    return not any(ab_s * i - ba_s * j for i, j in list(zip(ab[1], ba[1])))
 
 
 def anticommute(a, b):
     """ Returns True if operators anticommute """
     ab, ba = stab_multiply(a, b), stab_multiply(b, a)
     ab_s, ba_s = (-1) ** int(ab[0] > 2), (-1) ** int(ba[0] > 2)
-    return not any(ab_s * i + ba_s * j for i, j in izip(ab[1], ba[1]))
+    return not any(ab_s * i + ba_s * j for i, j in list(zip(ab[1], ba[1])))
 
 
 def weight(stab):
@@ -124,4 +124,4 @@ def compatible(a, b):
         Two Pauli strings are compatible if they don't contain any differing
         Pauli on a qubit.
     """
-    return not any(i != j and i * j != 0 for i, j in izip(a, b))
+    return not any(i != j and i * j != 0 for i, j in list(zip(a, b)))

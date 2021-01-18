@@ -2,7 +2,7 @@
 import networkx as nx
 from random import random
 # Import local modules
-from channel import Channel
+from channels.channel import Channel
 
 
 class GraphChannel(Channel):
@@ -22,7 +22,7 @@ class GraphChannel(Channel):
 def random_connected_graph_edges(nxg_gen, nodes, arg, output=None):
     """ Generates a Erdos-Renyi G_{n,p} random graph """
     n = len(nodes)
-    relabel = {i: node for node, i in zip(nodes, range(n))}
+    relabel = {i: node for node, i in list(zip(nodes, range(n)))}
     g = nx.Graph([(0, 1), (2, 3)])
     while not nx.is_connected(g):
         g = nxg_gen(n, arg)
@@ -79,9 +79,9 @@ if __name__ == '__main__':
     nodes = 14
     for i in range(1000):
         prob_edge = random() / 3
-        print "Prob Edge = ", prob_edge
+        print("Prob Edge = ", prob_edge)
         psi = RandomGNPGraphChannel(nodes, prob_edge)
-        print psi
-        print "Testing channel"
+        print(psi)
+        print("Testing channel")
         psi._test_all_non_trivial_combos_found(print_stabs=True)
         psi._test_combo_stabs_correct()

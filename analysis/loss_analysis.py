@@ -18,6 +18,7 @@ from utils.utils import flatten, init_worker
 
 def get_loss_tolerance(mnt_patterns, qubit_key):
     """ Gets all possible combinations of qubit loss patterns can tolerate """
+    print('\n           get_loss_tolerance         \n')
     for w, patterns in mnt_patterns.items():
         n_q = set([tuple(q for op, q in zip(pattern, qubit_key) if not op)
                    for pattern in patterns])
@@ -27,6 +28,7 @@ def get_loss_tolerance(mnt_patterns, qubit_key):
 
 def get_all_loss_tols(max_tols):
     """ Finds all subsets of loss tolerable by measurement patterns """
+    print('\n           get_all_loss_tols         \n')
     all_tols = set()
     while max_tols:
         max_tol = max_tols.pop()
@@ -37,13 +39,14 @@ def get_all_loss_tols(max_tols):
             sub_tol = list(sub_tol)
             if sub_tol in max_tols:
                 max_tols.remove(sub_tol)
-    all_tols = map(list, list(all_tols))
+    all_tols = list(map(list, list(all_tols)))
     all_tols.append([])
     return all_tols
 
 
 def import_loss_tols(in_file, filename=None):
     """ Imports and formats loss tols for use. Exports to file, if provided """
+    print('\n           import_loss_tols         \n')
     with open(in_file, 'r') as fp:
         data = json.load(fp)
     max_tols = flatten(value for value in data.values())
@@ -59,6 +62,7 @@ def graph_loss_tols(graph, i, o, filename=None):
         Gets all configurations graph pathfinding is loss tolerant to.
         Exports output to file, if provided.
     """
+    print('\n           graph_loss_tols         \n')
     nodes = set(graph.nodes()) - set([i, o])
     all_tols = [[]]
     loss_tol_nodes = set(nodes)
@@ -87,10 +91,11 @@ def get_per_node_loss_tol(all_tols, filename=None):
         For each qubit in the state, calculates the number of measurement
         patterns that can tolerate it's loss.
     """
+    print('\n           get_per_node_loss_tol        \n')
     tol_counts = Counter(flatten(all_tols))
     tol_counts = [[n, count] for n, count in tol_counts.items()]
     if filename:
-        with open(filename, 'wb') as csvfile:
+        with open(filename, 'w') as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow(['node', 'tol_count'])
             writer.writerows(tol_counts)
@@ -99,6 +104,7 @@ def get_per_node_loss_tol(all_tols, filename=None):
 
 def most_common_mnt(avail_pats, qubit_key, measured):
     """ Picks measurement that occurs most in the available patterns """
+    print('\n           most_common_mnt        \n')
     all_mnts = dict(Counter((q, mnt)
                             for mnt_pat in flatten(avail_pats.values())
                             for q, mnt in zip(qubit_key, mnt_pat)
@@ -111,6 +117,7 @@ def most_common_mnt(avail_pats, qubit_key, measured):
 
 def max_tol_mnt(avail_pats, qubit_key, measured):
     """ Picks most common measurement in the most loss tolerant patterns """
+    print('\n           max_tol_mnt        \n')
     best_pats = avail_pats[min(avail_pats)]
     best_mnts = dict(Counter((q, mnt) for mnt_pat in best_pats for q, mnt
                              in zip(qubit_key, mnt_pat)
@@ -130,8 +137,9 @@ def update_mnt_pats(avail_pats, q_index, basis):
         Updates the set of available measurement patterns after qubit
         measurement by removing any patterns that don't contain it.
     """
+    print('\n           update_mnt_pats        \n')
     new_pats = dict()
-    for w, mnt_pats in avail_pats.iteritems():
+    for w, mnt_pats in avail_pats.items():
         new_mnt_pats = [pat for pat in mnt_pats if pat[q_index] == basis]
         if any(new_mnt_pats):
             new_pats.update({w: new_mnt_pats})
@@ -141,6 +149,7 @@ def update_mnt_pats(avail_pats, q_index, basis):
 def heralded_loss_tel_mc(loss_tols, qubit_key, loss_probs, mc_reps,
                          filename=None, verbose=False):
     """ Monte carlo simulation of teleportation with heralded loss """
+    print('\n           heralded_loss_tel_mc        \n')
     data = []
     n = len(qubit_key)
     for prob_loss in tqdm(loss_probs):
@@ -154,7 +163,7 @@ def heralded_loss_tel_mc(loss_tols, qubit_key, loss_probs, mc_reps,
             tqdm.write(str(datum))
         data.append(datum)
     if filename:
-        with open(filename, 'wb') as csvfile:
+        with open(filename, 'w') as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow(['prob_loss', 'prob_tel', 'prob_tel_std'])
             writer.writerows(data)
@@ -163,6 +172,7 @@ def heralded_loss_tel_mc(loss_tols, qubit_key, loss_probs, mc_reps,
 
 def unheralded_loss_tel_sim(params):
     """ Simulates single instance of teleportation with unheralded loss """
+    print('\n           unheralded_loss_tel_sim        \n')
     mnt_pats, n_all_tols, qubit_key, prob_loss, p_func = params
     loss = [q for q in qubit_key[1:] if random() < prob_loss]
     if loss == []:
@@ -190,6 +200,7 @@ def unheralded_loss_tel_mc(mnt_pats, all_tols, qubit_key, loss_probs, mc_reps,
                            filename=None, workers=1, strategy='max_tol',
                            verbose=False):
     """ Monte carlo simulates teleportation with unheralded loss """
+    print('\n           unheralded_loss_tel_mc        \n')
     data = []
     n_all_tols = defaultdict(list)
     for tol in all_tols:
@@ -211,7 +222,7 @@ def unheralded_loss_tel_mc(mnt_pats, all_tols, qubit_key, loss_probs, mc_reps,
             tqdm.write(str(datum))
         data.append(datum)
     if filename:
-        with open(filename, 'wb') as csvfile:
+        with open(filename, 'w') as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow(['prob_loss', 'prob_tel', 'prob_tel_std'])
             writer.writerows(data)
@@ -220,13 +231,14 @@ def unheralded_loss_tel_mc(mnt_pats, all_tols, qubit_key, loss_probs, mc_reps,
 
 def get_qubit_no_loss_tolerances(loss_tols, qubit_key, filename=None):
     """ Finds tolerances of different loss configurations """
+    print('\n           get_qubit_no_loss_tolerances        \n')
     data = []
     n = len(qubit_key)
     loss_nos = Counter(map(len, loss_tols))
     config_tol = [[q, c, binom(n, q), float(c) / binom(n, q)]
                   for q, c in loss_nos.items() if q > 0]
     if filename:
-        with open(filename, 'wb') as csvfile:
+        with open(filename, 'w') as csvfile:
             writer = csv.writer(csvfile)
             header = ['qubits', 'tol_configs', 'tot_configs', 'config_tol']
             writer.writerow(header)
@@ -239,6 +251,7 @@ def get_max_weight_efficiencies(psi, max_weight, filename=None, verbose=False):
         Gets loss tolerance of measurement patterns produced with different
         absolute maximum weights.
     """
+    print('\n           get_max_weight_efficiencies        \n')
     data = []
     for w in tqdm(range(1, max_weight + 1)):
         mnt_pats, qubit_key = psi.get_mnt_patterns(
@@ -251,7 +264,7 @@ def get_max_weight_efficiencies(psi, max_weight, filename=None, verbose=False):
             tqdm.write(str(datum))
         data.append(datum)
     if filename:
-        with open(filename, 'wb') as csvfile:
+        with open(filename, 'w') as csvfile:
             writer = csv.writer(csvfile)
             header = ['max_weight', 'loss_tol_configs']
             writer.writerow(header)

@@ -71,11 +71,11 @@ if __name__ == '__main__':
     if not os.path.exists('pngs'):
         os.makedirs('pngs')
     in_files = \
-        ['data/W4xL4_TriangularLatticeChannel_MW10_1000MC_SPF_UH_MT_TEL_RATE.csv',
-         'data/W4xL4_TriangularLatticeChannel_MW11_1000MC_SPF_UH_MT_TEL_RATE.csv',
-         'data/W4xL4_TriangularLatticeChannel_MW12_1000MC_SPF_UH_MT_TEL_RATE.csv',
-         'data/W4xL4_TriangularLatticeChannel_MW13_1000MC_SPF_UH_MT_TEL_RATE.csv',
-         'data/W4xL4_TriangularLatticeChannel_MW14_1000MC_SPF_UH_MT_TEL_RATE.csv']
+        ['data/W4xL4_CrazyGraphChannel_MW10_1000MC_SPF_UH_MT_TEL_RATE.csv',
+         'data/W4xL4_CrazyGraphChannel_MW11_1000MC_SPF_UH_MT_TEL_RATE.csv',
+         'data/W4xL4_CrazyGraphChannel_MW12_1000MC_SPF_UH_MT_TEL_RATE.csv',
+         'data/W4xL4_CrazyGraphChannel_MW13_1000MC_SPF_UH_MT_TEL_RATE.csv',
+         'data/W4xL4_CrazyGraphChannel_MW14_1000MC_SPF_UH_MT_TEL_RATE.csv']
     out_file = 'pngs/tri_UH_for_diff_weights.png'
     styles = [{'color': 'b', 'line': '-', 'label': '10'},
               {'color': 'r', 'line': '-', 'label': '11'},

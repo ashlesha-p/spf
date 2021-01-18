@@ -3,13 +3,13 @@ import sys
 import numpy as np
 import itertools as it
 from random import randint
-from numba import cuda, autojit
+from numba import cuda, jit
 # Import local modules
 sys.path.append('..')
-from utils import int_to_bits
+from utils.utils import int_to_bits
 
 
-@autojit
+@jit
 def merge_combos(source, target):
     c_s, s_s, r_s = source
     c_t, s_t, r_t = target
@@ -51,7 +51,7 @@ def problem_chucks(sources, targets, dtype, max_bytes=10000000):
     all_inputs = [o_array, sources, targets]
     chunks = sum(map(sys.getsizeof, all_inputs)) / max_bytes + 1
     if chunks > 1:
-        print "Splitting problem into %d chunks" % (chunks)
+        print("Splitting problem into %d chunks" % (chunks))
     return it.product([sources], np.array_split(targets, chunks))
 
 
